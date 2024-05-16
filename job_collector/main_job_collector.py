@@ -1,4 +1,5 @@
 import random
+import re
 
 from time import sleep
 import pprint
@@ -13,7 +14,7 @@ def unloading_vacancies(page_: int) -> dict | str:
     url = 'https://api.hh.ru/vacancies'
 
     params = {'text': '!"python developer" not c++ not c#',
-              'area': 113,
+              'area': 4,
               'area_id': 113,
               'per_page': 100,
               'page': page_,
@@ -32,13 +33,14 @@ def unloading_vacancies(page_: int) -> dict | str:
     return vacancies
 
 
-def operations_amounts(sum_from: str, sum_to: str) -> int:
+def operations_amounts(sum_from: str, sum_to: str) -> int|list:
     """
    Проводит операции над суммами
    :return: init
    """
     if sum_from is not None and sum_to is not None:
-        sum_ = (int(sum_from) + int(sum_to)) / 2
+        # sum_ = (int(sum_from) + int(sum_to)) / 2
+        sum_ = [int(sum_from), int(sum_to)]
 
     elif sum_from is None and sum_to is not None:
         sum_ = int(sum_to)
@@ -46,7 +48,32 @@ def operations_amounts(sum_from: str, sum_to: str) -> int:
     else:
         sum_ = int(sum_from)
 
-    return round(sum_)
+    # return round(sum_)
+    return sum_
+
+
+def analysis_name(name: str) -> list:
+    """
+    Разбирает name для выявления требуемой классификации разработчиков,
+    требуемые framework.
+    :param name:
+    :return: Список из классификации разработчика и требуемые framework
+    """
+    framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle', 'tornado', 'web.py',
+                 'fastapi']
+    developer = ['junior', 'middle', 'senior']
+    developer_class = []
+    required_framework = []
+
+    strip_name = re.split(r'[,:;/ \s+]', re.sub(r'[+\-()\|]', '', name).lower())
+
+    for el in strip_name:
+        if el in developer:
+            developer_class.append(el)
+        elif el in framework:
+            required_framework.append(el)
+
+    return [developer_class, required_framework]
 
 
 def sorting_vacancies():
@@ -65,6 +92,7 @@ def sorting_vacancies():
         if vacancies != 'stop' and len(vacancies) > 0:
             for vacancy in vacancies:
                 name = vacancy.get('name')
+                developer_class, required_framework = analysis_name(name)
                 id_ = vacancy.get('id')
                 sum_ = operations_amounts(vacancy.get('salary').get('from'), vacancy.get('salary').get('to'))
                 area = [vacancy.get('area').get('id'), vacancy.get('area').get('name')]
@@ -78,6 +106,8 @@ def sorting_vacancies():
                     'area': area,
                     'published_at': published_at,
                     'professional_roles': professional_roles,
+                    'developer_class': developer_class,
+                    'required_framework': required_framework
                 }
 
                 list_vacancies.append(str_vacancy)
