@@ -33,7 +33,7 @@ def unloading_vacancies(page_: int) -> dict | str:
     return vacancies
 
 
-def operations_amounts(sum_from: str, sum_to: str) -> int|list:
+def operations_amounts(sum_from: str, sum_to: str) -> int | list:
     """
    Проводит операции над суммами
    :return: init
