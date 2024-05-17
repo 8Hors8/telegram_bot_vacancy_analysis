@@ -124,6 +124,7 @@ def sorting_vacancies():
         else:
             sleep(time_)
 
+
     print(len(list_vacancies))
     pprint.pprint(list_vacancies)
     return list_vacancies
