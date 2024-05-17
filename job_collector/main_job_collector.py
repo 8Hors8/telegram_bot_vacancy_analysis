@@ -1,9 +1,10 @@
 import random
 import re
-
-from time import sleep
 import pprint
 import requests
+
+from time import sleep
+
 
 
 def unloading_vacancies(page_: int) -> dict | str:
