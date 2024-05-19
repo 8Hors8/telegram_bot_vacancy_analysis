@@ -1,31 +1,27 @@
 import random
 import re
-import pprint
-import requests
+
+import datetime
 
 from time import sleep
+import requests
+from database import Database
 
 
-
-def unloading_vacancies(page_: int) -> dict | str:
+def request_api(url: str, params: dict = None):
     """
-    Делает запрос в API hh.ru.
-    Возвращает словари с вакансиями
+    Делает запрос в API.
+    Возвращает словари 
     """
-    url = 'https://api.hh.ru/vacancies'
 
-    params = {'text': '!"python developer" not c++ not c#',
-              'area': 4,
-              'area_id': 113,
-              'per_page': 100,
-              'page': page_,
-              'only_with_salary': True
-              }
     response = requests.get(url, params=params)
 
     if response.status_code == 200:
         data = response.json()
-        vacancies = data.get('items')
+        if params is not None:
+            vacancies = data.get('items')
+        else:
+            vacancies = data['rates']['RUB']
 
     else:
         print('Ошибка при запросе данных:', response.status_code)
@@ -34,20 +30,33 @@ def unloading_vacancies(page_: int) -> dict | str:
     return vacancies
 
 
-def operations_amounts(sum_from: str, sum_to: str) -> int | list:
+def operations_amounts(sum_from: str, sum_to: str, currency: str) -> str:
     """
    Проводит операции над суммами
-   :return: init
+   :return: str
    """
-    if sum_from is not None and sum_to is not None:
-        # sum_ = (int(sum_from) + int(sum_to)) / 2
-        sum_ = [int(sum_from), int(sum_to)]
+    if currency == 'RUR':
+        if sum_from is not None and sum_to is not None:
+            # sum_ = (int(sum_from) + int(sum_to)) / 2
+            sum_ = f'{sum_from},{sum_to}'
 
-    elif sum_from is None and sum_to is not None:
-        sum_ = int(sum_to)
+        elif sum_from is None and sum_to is not None:
+            sum_ = f'{sum_to}'
 
+        else:
+            sum_ = f'{sum_from}'
     else:
-        sum_ = int(sum_from)
+        url = "https://api.exchangerate-api.com/v4/latest/USD"
+        rub = request_api(url)
+        if sum_from is not None and sum_to is not None:
+            # sum_ = (int(sum_from) + int(sum_to)) / 2
+            sum_ = f'{sum_from * rub},{sum_to * rub}'
+
+        elif sum_from is None and sum_to is not None:
+            sum_ = f'{sum_to * rub}'
+
+        else:
+            sum_ = f'{sum_from * rub}'
 
     # return round(sum_)
     return sum_
@@ -60,8 +69,9 @@ def analysis_name(name: str) -> list:
     :param name:
     :return: Список из классификации разработчика и требуемые framework
     """
-    framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle', 'tornado', 'web.py',
-                 'fastapi']
+    framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',
+                 'tornado', 'web.py', 'fastapi'
+                 ]
     developer = ['junior', 'middle', 'senior']
     developer_class = []
     required_framework = []
@@ -74,18 +84,69 @@ def analysis_name(name: str) -> list:
         elif el in framework:
             required_framework.append(el)
 
-    return [developer_class, required_framework]
+    return [f'{developer_class}', f'{required_framework}']
+
+
+def transfers_data_bd(list_vacancies: list):
+    """
+    Создает и заполняет БД
+    :param list_vacancies:
+    """
+    table_name = 'vacancies'
+    columns = [
+        "id INTEGER PRIMARY KEY AUTOINCREMENT",
+        'vac_id VARCHAR(200)',
+        'name VARCHAR(200)',
+        'sum VARCHAR(200)',
+        'area VARCHAR(200)',
+        'published_at VARCHAR(200)',
+        'professional_roles VARCHAR(200)',
+        'developer_class VARCHAR(200)',
+        'required_framework VARCHAR(200)',
+        'date_scan DATE',
+    ]
+
+    db = Database()
+    db.create_table(table_name, columns)
+    filter_columns = ['vac_id']
+
+    vac_id_tuples = db.select_data(table_name, filter_columns)
+    vac_id = [item[0] for item in vac_id_tuples]
+
+    for dict_vacancies in list_vacancies:
+        if dict_vacancies['vac_id'] not in vac_id:
+            db.insert_data(table_name, dict_vacancies)
+    db.close_connection()
 
 
 def sorting_vacancies():
+    """
+    Тут когда-нибудь что-то будет написано по делу
+    :return:
+    """
     page_ = 0
 
     list_vacancies = []
     stop = ''
 
     while stop != 'stop':
-        vacancies = unloading_vacancies(page_)
+
         time_ = random.randint(5, 30)
+
+        url = 'https://api.hh.ru/vacancies'
+
+        params = {
+            'text': '!"python developer" OR !"django" NOT "Программист С++" not C++ not C# '
+                    'not Повар not Торговый not Менеджер not технической not поддержки  '
+                    'not Учитель not продаж',
+            'area': 4,
+            'area_id': 113,
+            'per_page': 100,
+            'page': page_,
+            'only_with_salary': True
+        }
+        vacancies = request_api(url, params)
+
         # pprint.pprint(vacancies)
         print(f'страница {page_}--------------------------------------------')
         print(len(vacancies))
@@ -95,20 +156,25 @@ def sorting_vacancies():
                 name = vacancy.get('name')
                 developer_class, required_framework = analysis_name(name)
                 id_ = vacancy.get('id')
-                sum_ = operations_amounts(vacancy.get('salary').get('from'), vacancy.get('salary').get('to'))
+                sum_ = operations_amounts(vacancy.get('salary').get('from'),
+                                          vacancy.get('salary').get('to'),
+                                          vacancy.get('salary').get('currency'),
+
+                                          )
                 area = [vacancy.get('area').get('id'), vacancy.get('area').get('name')]
                 published_at = vacancy.get('published_at').split('T')[0]
                 professional_roles = vacancy.get("professional_roles")[0]
 
                 str_vacancy = {
-                    'id': id_,
+                    'vac_id': id_,
                     'name': name,
                     'sum': sum_,
-                    'area': area,
+                    'area': f'{area}',
                     'published_at': published_at,
-                    'professional_roles': professional_roles,
+                    'professional_roles': f'{professional_roles}',
                     'developer_class': developer_class,
-                    'required_framework': required_framework
+                    'required_framework': required_framework,
+                    'date_scan': datetime.date.today()
                 }
 
                 list_vacancies.append(str_vacancy)
@@ -125,8 +191,7 @@ def sorting_vacancies():
         else:
             sleep(time_)
 
-    print(len(list_vacancies))
-    pprint.pprint(list_vacancies)
+    transfers_data_bd(list_vacancies)
     return list_vacancies
 
 
