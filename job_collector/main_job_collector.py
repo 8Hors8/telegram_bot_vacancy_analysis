@@ -1,6 +1,6 @@
 import random
 import re
-import pprint
+
 import datetime
 
 from time import sleep
@@ -30,10 +30,10 @@ def request_api(url: str, params: dict = None):
     return vacancies
 
 
-def operations_amounts(sum_from: str, sum_to: str,currency:str) -> str:
+def operations_amounts(sum_from: str, sum_to: str, currency: str) -> str:
     """
    Проводит операции над суммами
-   :return: init
+   :return: str
    """
     if currency == 'RUR':
         if sum_from is not None and sum_to is not None:
@@ -115,11 +115,13 @@ def transfers_data_bd(list_vacancies: list):
 
     for dict_vacancies in list_vacancies:
         if dict_vacancies['vac_id'] not in vac_id:
-            db.insert_data('vacancies', dict_vacancies)
+            db.insert_data(table_name, dict_vacancies)
+    db.close_connection()
+
 
 def sorting_vacancies():
     """
-    тут когда-нибудь что-то будет написано по делу
+    Тут когда-нибудь что-то будет написано по делу
     :return:
     """
     page_ = 0
@@ -134,9 +136,10 @@ def sorting_vacancies():
         url = 'https://api.hh.ru/vacancies'
 
         params = {
-            'text': '!"python developer" OR !"django" NOT "Программист С++" not C++ not C# not Повар not Торговый '
-                    'not Менеджер not технической not поддержки  not Учитель not продаж',
-            'area': 1,
+            'text': '!"python developer" OR !"django" NOT "Программист С++" not C++ not C# '
+                    'not Повар not Торговый not Менеджер not технической not поддержки  '
+                    'not Учитель not продаж',
+            'area': 4,
             'area_id': 113,
             'per_page': 100,
             'page': page_,
@@ -189,8 +192,6 @@ def sorting_vacancies():
             sleep(time_)
 
     transfers_data_bd(list_vacancies)
-    print(len(list_vacancies))
-    pprint.pprint(list_vacancies)
     return list_vacancies
 
 

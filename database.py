@@ -3,7 +3,7 @@ import sqlite3
 
 class Database:
     """
-        тут будет док. описание
+        Тут будет док. описание
     """
 
     def __init__(self):
@@ -43,12 +43,12 @@ class Database:
         self.cursor.execute(insert_query, values)
         self.con.commit()
 
-    def select_data(self, table_name: str, filter_columns: list, conditions:str = ''):
+    def select_data(self, table_name: str, filter_columns: list, conditions: str = ''):
         """
         Выгрузка данных с базы данных
         :param table_name:Название таблицы
         :param filter_columns : столбцы для фильтрации
-        :param conditions: условия для фильтрации WHERE 'название столбца'
+        :param conditions: условия для фильтрации пример WHERE 'название столбца'
         """
         filter_column = ','.join(filter_columns)
 
