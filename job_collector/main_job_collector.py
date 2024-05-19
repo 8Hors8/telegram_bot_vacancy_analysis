@@ -73,18 +73,25 @@ def analysis_name(name: str) -> list:
                  'tornado', 'web.py', 'fastapi'
                  ]
     developer = ['junior', 'middle', 'senior']
+    not_name = ['с++', 'c++', 'php', 'рнр']
     developer_class = []
     required_framework = []
+    permission = True
 
-    strip_name = re.split(r'[,:;/ \s+]', re.sub(r'[+\-()\|]', '', name).lower())
+    split_name = re.split(r'[,:;/ \s]', re.sub(r'[-()|]', ' ', name).lower())
 
-    for el in strip_name:
+
+    for el in split_name:
         if el in developer:
             developer_class.append(el)
         elif el in framework:
             required_framework.append(el)
 
-    return [f'{developer_class}', f'{required_framework}']
+        if el in not_name:
+            permission = False
+            break
+
+    return [f'{developer_class}', f'{required_framework}', permission]
 
 
 def transfers_data_bd(list_vacancies: list):
@@ -136,10 +143,9 @@ def sorting_vacancies():
         url = 'https://api.hh.ru/vacancies'
 
         params = {
-            'text': '!"python developer" OR !"django" NOT "Программист С++" not C++ not C# '
-                    'not Повар not Торговый not Менеджер not технической not поддержки  '
-                    'not Учитель not продаж',
-            'area': 4,
+            'text': '!"python developer" OR !"django" OR !"flask" OR !"fastapi"'
+                    'NOT DevOps',
+            'area': 113,
             'area_id': 113,
             'per_page': 100,
             'page': page_,
@@ -154,7 +160,7 @@ def sorting_vacancies():
         if vacancies != 'stop' and len(vacancies) > 0:
             for vacancy in vacancies:
                 name = vacancy.get('name')
-                developer_class, required_framework = analysis_name(name)
+                developer_class, required_framework, permission = analysis_name(name)
                 id_ = vacancy.get('id')
                 sum_ = operations_amounts(vacancy.get('salary').get('from'),
                                           vacancy.get('salary').get('to'),
@@ -176,8 +182,10 @@ def sorting_vacancies():
                     'required_framework': required_framework,
                     'date_scan': datetime.date.today()
                 }
+                professional_roles_id = [96, 124, 104]
 
-                list_vacancies.append(str_vacancy)
+                if int(professional_roles['id']) in professional_roles_id and permission is True:
+                    list_vacancies.append(str_vacancy)
 
         elif len(vacancies) == 0:
             break
