@@ -73,13 +73,12 @@ def analysis_name(name: str) -> list:
                  'tornado', 'web.py', 'fastapi'
                  ]
     developer = ['junior', 'middle', 'senior']
-    not_name = ['с++', 'c++', 'php', 'рнр']
+    not_name = ['с++', 'c++', 'php', 'рнр', 'vue', 'преподаватель']
     developer_class = []
     required_framework = []
     permission = True
 
     split_name = re.split(r'[,:;/ \s]', re.sub(r'[-()|]', ' ', name).lower())
-
 
     for el in split_name:
         if el in developer:
@@ -144,7 +143,7 @@ def sorting_vacancies():
 
         params = {
             'text': '!"python developer" OR !"django" OR !"flask" OR !"fastapi"'
-                    'NOT DevOps',
+                    'NOT DevOps NOT Преподаватель',
             'area': 113,
             'area_id': 113,
             'per_page': 100,
