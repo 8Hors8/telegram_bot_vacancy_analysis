@@ -31,7 +31,6 @@ class Database:
         :param data:список данных для внесения
         """
 
-
         columns = ', '.join(data.keys())
         placeholders = ', '.join(['?' for _ in range(len(data))])
 
@@ -44,13 +43,21 @@ class Database:
         self.cursor.execute(insert_query, values)
         self.con.commit()
 
-    def select_data(self, table_name, conditions):
+    def select_data(self, table_name: str, filter_columns: list, conditions:str = ''):
         """
         Выгрузка данных с базы данных
         :param table_name:Название таблицы
-        :param conditions:
+        :param filter_columns : столбцы для фильтрации
+        :param conditions: условия для фильтрации WHERE 'название столбца'
         """
-        pass
+        filter_column = ','.join(filter_columns)
+
+        select_query = f"""SELECT {filter_column} FROM {table_name} {conditions}"""
+
+        self.cursor.execute(select_query)
+        result = self.cursor.fetchall()
+
+        return result
 
     def close_connection(self):
         """

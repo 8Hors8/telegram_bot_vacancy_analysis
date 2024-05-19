@@ -108,9 +108,14 @@ def transfers_data_bd(list_vacancies: list):
 
     db = Database()
     db.create_table(table_name, columns)
-    for dict_vacancies in list_vacancies:
-        db.insert_data('vacancies', dict_vacancies)
+    filter_columns = ['vac_id']
 
+    vac_id_tuples = db.select_data(table_name, filter_columns)
+    vac_id = [item[0] for item in vac_id_tuples]
+
+    for dict_vacancies in list_vacancies:
+        if dict_vacancies['vac_id'] not in vac_id:
+            db.insert_data('vacancies', dict_vacancies)
 
 def sorting_vacancies():
     """
