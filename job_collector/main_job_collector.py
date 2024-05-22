@@ -50,13 +50,13 @@ def operations_amounts(sum_from: str, sum_to: str, currency: str) -> str:
         rub = request_api(url)
         if sum_from is not None and sum_to is not None:
             # sum_ = (int(sum_from) + int(sum_to)) / 2
-            sum_ = f'{sum_from * rub},{sum_to * rub}'
+            sum_ = f'{round(sum_from * rub)},{round(sum_to * rub)}'
 
         elif sum_from is None and sum_to is not None:
-            sum_ = f'{sum_to * rub}'
+            sum_ = f'{round(sum_to * rub)}'
 
         else:
-            sum_ = f'{sum_from * rub}'
+            sum_ = f'{round(sum_from * rub)}'
 
     # return round(sum_)
     return sum_
@@ -72,7 +72,7 @@ def analysis_name(name: str) -> list:
     framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',
                  'tornado', 'web.py', 'fastapi'
                  ]
-    developer = ['junior', 'middle', 'senior']
+    developer = ['junior', 'middle', 'senior','junior+','middle+','senior+']
     not_name = ['с++', 'c++', 'php', 'рнр', 'vue', 'преподаватель']
     developer_class = []
     required_framework = []
@@ -82,7 +82,7 @@ def analysis_name(name: str) -> list:
 
     for el in split_name:
         if el in developer:
-            developer_class.append(el)
+            developer_class.append(re.sub(r'[+]','',el))
         elif el in framework:
             required_framework.append(el)
 
