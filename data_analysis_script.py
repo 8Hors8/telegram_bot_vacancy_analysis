@@ -4,17 +4,22 @@ import seaborn as sns
 
 from pprint import pprint
 from database import Database
+import time
 
 
-def database_query(query_: list):
+
+def formation_filters(query_: list, dates_=None, city=None):
     """
 
     :param query_:
+    :param dates_:
+    :param city:
     :return:
     """
-    framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',
-                 'tornado', 'web.py', 'fastapi'
-                 ]
+    framework = [
+        'django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',
+        'tornado', 'web.py', 'fastapi'
+    ]
     developer = ['junior', 'middle', 'senior']
 
     overall_query = []
@@ -31,108 +36,108 @@ def database_query(query_: list):
         elif el in framework:
             framework_list.append(el)
 
-    table_name = 'vacancies'
-    result = {}
-    db = Database()
+    result = []
 
     if len(overall_query) > 0:
-        filter_columns = ['sum']
-        full_db = db.select_data(table_name, filter_columns)
-        ful = [int(val) for tup in full_db for val in tup[0].split(',')]
-        result['python_developer'] = sorted(ful)
+        header_sort_column = ''
+        attachment_sort_column = ''
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city,overall_query))
 
-    developer_query = ''
-    framework_query = ''
+    if len(developer_list) > len(framework_list) and framework_list:
+        header_sort_column = 'required_framework'
+        attachment_sort_column = 'developer_class'
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city, framework_list, developer_list))
 
-    if len(developer_list) > len(framework_list):
+    elif len(framework_list) > len(developer_list) and developer_list:
+        header_sort_column = 'developer_class'
+        attachment_sort_column = 'required_framework'
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city, developer_list, framework_list))
 
-        for el in developer_list:
+    elif developer_list and framework_list and len(developer_list) == len(framework_list):
+        header_sort_column = 'developer_class'
+        attachment_sort_column = 'required_framework'
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city, developer_list, framework_list))
 
-            if len(framework_list) > 0:
-                for com in framework_list:
-                    developer_query = ''
-                    framework_query = ''
+    elif len(developer_list) > 0:
+        header_sort_column = 'developer_class'
+        attachment_sort_column = ''
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city, developer_list))
 
-                    if len(developer_query) > 0:
-                        developer_query += ' OR '
-                    developer_query += f"""developer_class like'%{el}%'"""
-
-                    if len(framework_query) > 0:
-                        framework_query += ' OR '
-                    framework_query += f"""required_framework like'%{com}%'"""
-
-                    filter_columns = ['sum']
-                    query_str = f"""{developer_query} AND {framework_query}"""
-                    conditions = f'WHERE {query_str}'
-
-                    developer_db = db.select_data(table_name, filter_columns, conditions)
-                    developer_sum = [int(val) for tup in developer_db for val in tup[0].split(',')]
-
-                    if len(developer_sum) > 0:
-                        if com not in result:
-                            result[com] = {}
-                        result[com][el] = sorted(developer_sum)
-            else:
-                if len(developer_query) > 0:
-                    developer_query += ' OR '
-                developer_query += f"""developer_class like'%{el}%'"""
-
-                filter_columns = ['sum']
-                query_str = f"""{developer_query}"""
-                conditions = f'WHERE {query_str}'
-
-                developer_db = db.select_data(table_name, filter_columns, conditions)
-                developer_sum = [int(val) for tup in developer_db for val in tup[0].split(',')]
-
-                if len(developer_sum) > 0:
-                    result[el] = sorted(developer_sum)
-                developer_query = ''
-
-    elif len(developer_list) < len(framework_list):
-        for el in framework_list:
-            if len(developer_list) > 0:
-                for com in developer_list:
-                    developer_query = ''
-                    framework_query = ''
-                    if len(developer_query) > 0:
-                        developer_query += ' OR '
-                    developer_query += f"""developer_class like'%{com}%'"""
-
-                    if len(framework_query) > 0:
-                        framework_query += ' OR '
-                    framework_query += f"""required_framework like'%{el}%'"""
-
-                    filter_columns = ['sum']
-                    query_str = f"""{framework_query} AND {developer_query}"""
-                    conditions = f'WHERE {query_str}'
-
-                    developer_db = db.select_data(table_name, filter_columns, conditions)
-                    developer_sum = [int(val) for tup in developer_db for val in tup[0].split(',')]
-
-                    if len(developer_sum) > 0:
-                        if com not in result:
-                            result[com] = {}
-                        result[com][el] = sorted(developer_sum)
-            else:
-                if len(framework_query) > 0:
-                    framework_query += ' OR '
-                framework_query += f"""required_framework like'%{el}%'"""
-
-                filter_columns = ['sum']
-                query_str = f"""{framework_query}"""
-                conditions = f'WHERE {query_str}'
-
-                developer_db = db.select_data(table_name, filter_columns, conditions)
-                developer_sum = [int(val) for tup in developer_db for val in tup[0].split(',')]
-
-                if len(developer_sum) > 0:
-                    result[el] = sorted(developer_sum)
-                framework_query = ''
+    elif len(framework_list) > 0:
+        header_sort_column = 'required_framework'
+        attachment_sort_column = ''
+        result.append(db_query(header_sort_column, attachment_sort_column, dates_, city, framework_list))
     return result
 
 
+def db_query(header_sort_column: str, attachment_sort_column: str, dates_, city, sort_element_header: list,
+             sort_element_attachment: list = None, ):
+    """
+
+    :param header_sort_column:
+    :param attachment_sort_column:
+    :param sort_element_header:
+    :param dates_:
+    :param city:
+    :param sort_element_attachment:
+    :return:
+    """
+    db = Database()
+    table_name = 'vacancies'
+    filter_columns = ['sum']
+
+    result = {}
+    str_query = ''
+
+    date_str = formation_filters_date() if dates_ is not None else ''
+    city_str = formation_filters_city() if city is not None else ''
+
+    for hed in sort_element_header:
+        if sort_element_attachment is not None:
+            for attach in sort_element_attachment:
+                str_query += f"""{header_sort_column} LIKE '%{hed}%' AND {attachment_sort_column} LIKE '%{attach}%' {date_str} {city_str}"""
+                conditions = f'WHERE {str_query}'
+                query_db = db.select_data(table_name, filter_columns, conditions)
+                db_sum = sorted([int(val) for tup in query_db for val in tup[0].split(',')])
+                if len(db_sum) > 0:
+                    if hed not in result:
+                        result[hed] = {}
+                    result[hed][attach] = sorted(db_sum)
+                str_query = ''
+        else:
+            if hed != 'python developer':
+                str_query += f"""{header_sort_column} LIKE '%{hed}%' {date_str} {city_str}"""
+                conditions = f'WHERE {str_query}'
+            else:
+                conditions = ''
+            query_db = db.select_data(table_name, filter_columns, conditions)
+            db_sum = sorted([int(val) for tup in query_db for val in tup[0].split(',')])
+            if len(db_sum) > 0:
+                result[hed] = sorted(db_sum)
+            str_query = ''
+
+    return result
+
+
+def formation_filters_date():
+    pass
+
+
+def formation_filters_city():
+    pass
+
 
 if __name__ == '__main__':
-    query = ['django', 'fastapi','middle']
-    r = database_query(query)
-    print(r)
+    start = time.time()
+    # query = ['python developer']
+    # query = ['django', 'fastapi', 'middle']
+    # query = ['django', 'junior', 'middle']
+    # query = ['python developer','django', 'fastapi', 'middle']
+    # query = ['django', 'middle']
+    query = ['django', 'middle', 'senior', 'fastapi']
+    # query = ['middle']
+    # query = ['django']
+    r = formation_filters(query)
+    finish = time.time() - start
+    print(r,len(r))
+    print(finish)
