@@ -1,8 +1,6 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-from pprint import pprint
+
+
 from database import Database
 import time
 

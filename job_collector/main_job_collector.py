@@ -72,7 +72,7 @@ def analysis_name(name: str) -> list:
     framework = ['django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',
                  'tornado', 'web.py', 'fastapi'
                  ]
-    developer = ['junior', 'middle', 'senior','junior+','middle+','senior+']
+    developer = ['junior', 'middle', 'senior', 'junior+', 'middle+', 'senior+']
     not_name = ['с++', 'c++', 'php', 'рнр', 'vue', 'преподаватель']
     developer_class = []
     required_framework = []
@@ -82,7 +82,7 @@ def analysis_name(name: str) -> list:
 
     for el in split_name:
         if el in developer:
-            developer_class.append(re.sub(r'[+]','',el))
+            developer_class.append(re.sub(r'[+]', '', el))
         elif el in framework:
             required_framework.append(el)
 
