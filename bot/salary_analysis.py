@@ -47,9 +47,9 @@ def prepare_dataframe(salaries_dict):
 
     for key, salaries in salaries_dict.items():
         positions.append(key)
-        min_salaries.append(min(salaries)/1000)
-        mean_salaries.append(int((sum(salaries) / len(salaries))/1000))
-        max_salaries.append(max(salaries)/1000)
+        min_salaries.append(min(salaries) / 1000)
+        mean_salaries.append(int((sum(salaries) / len(salaries)) / 1000))
+        max_salaries.append(max(salaries) / 1000)
 
     data = {
         'Позиция': positions,
@@ -57,7 +57,7 @@ def prepare_dataframe(salaries_dict):
         'Mean': mean_salaries,
         'Max': max_salaries
     }
-    print(data)
+
     return pd.DataFrame(data)
 
 
@@ -73,12 +73,13 @@ def plot_salaries(df):
         plt.scatter(row['Mean'], index, color='blue', zorder=3)
 
     plt.yticks(range(len(df)), df['Позиция'])
+    plt.gca().invert_yaxis()
     plt.xlabel('Зарплата (тыс. рублей)')
-    plt.title('Зарплаты по категориям')
+    plt.title('Анализ зарплат')
     plt.show()
 
 
 if __name__ == '__main__':
-    e = extract_salaries(['senior'])
+    e = extract_salaries(['django', 'junior', 'middle', 'fastapi', 'senior'])
     r = prepare_dataframe(e)
     plot_salaries(r)
