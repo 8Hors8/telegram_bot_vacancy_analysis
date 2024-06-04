@@ -4,12 +4,17 @@ import seaborn as sns
 from generating_queries_database import formation_filters as ff
 
 
-def extract_salaries(filter_):
+def extract_salaries(filter_: list, datas_=None, city=None):
     """
     Рекурсивно извлекает все зарплаты из вложенных словарей и списков.
     Возвращает словарь с ключами и зарплатами.
+
+    :param filter_: list
+    :param datas_: list ['дата от','дата до'] пример ['2024-03', '2024-04']
+    :param city: str
+    :return:
     """
-    data_list = ff(filter_)
+    data_list = ff(query_=filter_, dates_=datas_, city=city)
 
     salaries_dict = {}
 

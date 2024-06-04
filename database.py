@@ -3,7 +3,7 @@ import sqlite3
 
 class Database:
     """
-        Тут будет док. описание
+        Тут будет док. Описание
     """
 
     def __init__(self):

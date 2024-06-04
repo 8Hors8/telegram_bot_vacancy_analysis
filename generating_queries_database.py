@@ -1,16 +1,13 @@
-
-
-
-from database import Database
 import time
+from database import Database
 
 
 def formation_filters(query_: list, dates_=None, city=None):
     """
 
-    :param query_:
-    :param dates_:
-    :param city:
+    :param query_: list
+    :param dates_: list ['дата от','дата до'] пример ['2024-03', '2024-04']
+    :param city:str
     :return:
     """
     framework = [
@@ -94,8 +91,8 @@ def db_query(header_sort_column: str, attachment_sort_column: str, dates_,
     result = {}
     str_query = ''
 
-    date_str = formation_filters_date() if dates_ is not None else ''
-    city_str = formation_filters_city() if city is not None else ''
+    date_str = formation_filters_date(dates_) if dates_ is not None else ''
+    city_str = formation_filters_city(city) if city is not None else ''
 
     for hed in sort_element_header:
         if sort_element_attachment is not None:
@@ -115,7 +112,11 @@ def db_query(header_sort_column: str, attachment_sort_column: str, dates_,
                 str_query += f"""{header_sort_column} LIKE '%{hed}%' {date_str} {city_str}"""
                 conditions = f'WHERE {str_query}'
             else:
-                conditions = ''
+                if dates_ or city:
+                    str_query = unique_request(dates_,city)
+                    conditions = f'WHERE {str_query}'
+                else:
+                    conditions = ''
             query_db = db.select_data(table_name, filter_columns, conditions)
             db_sum = sorted([int(val) for tup in query_db for val in tup[0].split(',')])
             if len(db_sum) > 0:
@@ -125,13 +126,46 @@ def db_query(header_sort_column: str, attachment_sort_column: str, dates_,
     return result
 
 
-def formation_filters_date():
-    pass
+def formation_filters_date(data_: list):
+    """
+    Добавляет в фильтр дату
+    :param data_: list ['дата от','дата до'] пример ['2024-03', '2024-04']
+    :return: str
+    """
+    if len(data_) > 1:
+        return f"""AND strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND '{data_[1]}'"""
+    else:
+        return f"""AND strftime('%Y-%m', date_scan) = '{data_[0]}'"""
 
 
-def formation_filters_city():
-    pass
+def formation_filters_city(city: str):
+    """
+    Добавляет в фильтр город
+    :param city:
+    :return: str
+    """
+    return f"""AND area LIKE '%{city}%'"""
 
+
+def unique_request(data_, city):
+    """
+    Добавляет фильтр к общему запросу
+    :param data_:
+    :param city:
+    :return:
+    """
+    str_query = ''
+    if data_:
+        city_str = formation_filters_city(city) if city is not None else ''
+        if len(data_)>1:
+
+            str_query += f"""strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND '{data_[1]}' {city_str}"""
+        else:
+            str_query += f""" strftime('%Y-%m', date_scan) = '{data_[0]}' {city_str}"""
+    else:
+        str_query += f"""area LIKE '%{city}%'"""
+
+    return str_query
 
 if __name__ == '__main__':
     start = time.time()
