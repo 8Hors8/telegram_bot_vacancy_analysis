@@ -1,12 +1,14 @@
 import concurrent.futures
 from job_collector.main_job_collector import sorting_vacancies
-from bot.salary_analysis import extract_salaries, prepare_dataframe, plot_salaries
-import time
+from extract_db_df_salaries import extract_salaries, prepare_dataframe
+from bot.salary_analysis import plot_salaries
 
 if __name__ == '__main__':
+    import time
+
     start = time.time()
     # sorting_vacancies()
-    e = extract_salaries(['python developer','django', 'junior', 'middle', 'fastapi', 'senior'])
+    e = extract_salaries(['django', 'junior', 'middle', 'senior'], ['2024-05'])
     r = prepare_dataframe(e)
     plot_salaries(r)
     finish = time.time() - start

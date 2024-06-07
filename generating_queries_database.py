@@ -113,7 +113,7 @@ def db_query(header_sort_column: str, attachment_sort_column: str, dates_,
                 conditions = f'WHERE {str_query}'
             else:
                 if dates_ or city:
-                    str_query = unique_request(dates_,city)
+                    str_query = unique_request(dates_, city)
                     conditions = f'WHERE {str_query}'
                 else:
                     conditions = ''
@@ -133,9 +133,11 @@ def formation_filters_date(data_: list):
     :return: str
     """
     if len(data_) > 1:
-        return f"""AND strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND '{data_[1]}'"""
+        query_list = f"""AND strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND '{data_[1]}'"""
     else:
-        return f"""AND strftime('%Y-%m', date_scan) = '{data_[0]}'"""
+        query_list = f"""AND strftime('%Y-%m', date_scan) = '{data_[0]}'"""
+
+    return query_list
 
 
 def formation_filters_city(city: str):
@@ -157,15 +159,17 @@ def unique_request(data_, city):
     str_query = ''
     if data_:
         city_str = formation_filters_city(city) if city is not None else ''
-        if len(data_)>1:
+        if len(data_) > 1:
 
-            str_query += f"""strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND '{data_[1]}' {city_str}"""
+            str_query += f"""strftime('%Y-%m', date_scan) BETWEEN '{data_[0]}' AND
+             '{data_[1]}' {city_str}"""
         else:
             str_query += f""" strftime('%Y-%m', date_scan) = '{data_[0]}' {city_str}"""
     else:
         str_query += f"""area LIKE '%{city}%'"""
 
     return str_query
+
 
 if __name__ == '__main__':
     start = time.time()
