@@ -1,7 +1,7 @@
 import concurrent.futures
 from job_collector.main_job_collector import sorting_vacancies
 from extract_db_df_salaries import extract_salaries, prepare_dataframe
-from bot.salary_analysis import plot_salaries
+from building_salary_schedules import plot_salaries
 
 if __name__ == '__main__':
     import time
