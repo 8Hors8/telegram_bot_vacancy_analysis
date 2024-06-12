@@ -22,7 +22,7 @@ def monthly_average_salaries():
                 df['city'] = city
                 db_engine = create_engine('sqlite:///JobMarketDB.db')
                 df[['position', 'mean', 'date', 'city']].to_sql('salaryinsights',
-                                                                db_engine, if_exists='append', index=True)
+                                                                db_engine, if_exists='append', index=False)
 
 
 def receipt_previous_month():
