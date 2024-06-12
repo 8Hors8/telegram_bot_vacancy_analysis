@@ -1,3 +1,4 @@
+"""Преобразует данные из БД в DataFrame """
 from generating_queries_database import formation_filters as ff
 import pandas as pd
 
