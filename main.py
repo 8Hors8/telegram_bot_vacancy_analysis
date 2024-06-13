@@ -1,15 +1,19 @@
-import concurrent.futures
-from job_collector.main_job_collector import sorting_vacancies
-from extract_db_df_salaries import extract_salaries, prepare_dataframe
-from building_salary_schedules import plot_salaries
+import multiprocessing
+from bot.main_bot import main_loop
+from job_collector.cron_jobs import start_
 
 if __name__ == '__main__':
-    import time
+    # Создаем два процесса для каждой функции
+    process1 = multiprocessing.Process(target=main_loop)
+    process2 = multiprocessing.Process(target=start_)
 
-    start = time.time()
-    # sorting_vacancies()
-    e = extract_salaries(['django', 'junior', 'middle', 'senior'], ['2024-05'])
-    r = prepare_dataframe(e)
-    plot_salaries(r)
-    finish = time.time() - start
-    print(finish)
+    # Запускаем процессы
+    process1.start()
+    process2.start()
+
+    # Ожидаем завершения работы каждого процесса
+    process1.join()
+    process2.join()
+
+    # Выводим сообщение после завершения работы обоих процессов
+    print("Работа всех процессов завершена")

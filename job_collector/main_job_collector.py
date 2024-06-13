@@ -127,7 +127,7 @@ def transfers_data_bd(list_vacancies: list):
 
 def sorting_vacancies():
     """
-    Тут когда-нибудь что-то будет написано по делу
+    Запрашивает и обрабатывает вакансии
     :return:
     """
     page_ = 0

@@ -98,4 +98,4 @@ def monthly_salary_plot(filter_: dict):
 
 
 if __name__ == '__main__':
-    monthly_salary_plot({'filter': 'django', 'city': 'Москва'})
+    monthly_salary_plot({'filter': 'python developer', 'city': 'Москва'})
