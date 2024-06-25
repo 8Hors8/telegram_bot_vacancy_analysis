@@ -1,7 +1,6 @@
 import multiprocessing
 import os
 from dotenv import load_dotenv
-from bot.main_bot import TelegramBot
 from job_collector.cron_jobs import start_
 
 def main():
@@ -11,12 +10,12 @@ def main():
     # Загружаем переменные окружения из файла token.env
     load_dotenv(dotenv_path='./bot/token.env')
 
-    API_TOKEN = os.getenv('BOT_API_TOKEN')
-    if not API_TOKEN:
+    api_token = os.getenv('BOT_API_TOKEN')
+    if not api_token:
         raise ValueError("Токен API не предоставлен. Установите BOT_API_TOKEN в файле token.env")
 
     # Создаем и запускаем два процесса
-    process1 = multiprocessing.Process(target=run_bot, args=(API_TOKEN,))
+    process1 = multiprocessing.Process(target=run_bot, args=(api_token,))
     process2 = multiprocessing.Process(target=start_)
 
     # Запускаем процессы
