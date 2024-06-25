@@ -1,6 +1,5 @@
 from aiogram import Dispatcher
-
+from .command_handler import register_command_handlers
 
 def register_all_handlers(dp: Dispatcher):
-    register_common_handlers(dp)
-    register_inline_handlers(dp)
+    register_command_handlers(dp)
