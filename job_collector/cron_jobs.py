@@ -21,3 +21,5 @@ def start_():
             time.sleep(2)
     except KeyboardInterrupt:
         scheduler.shutdown()
+if __name__ == '__main__':
+    start_()

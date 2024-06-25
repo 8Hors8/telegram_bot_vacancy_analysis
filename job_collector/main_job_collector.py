@@ -2,6 +2,7 @@ import random
 import re
 
 import datetime
+import time
 
 from time import sleep
 import requests
@@ -13,21 +14,26 @@ def request_api(url: str, params: dict = None):
     Делает запрос в API.
     Возвращает словари 
     """
+    try:
+        response = requests.get(url, params=params)
 
-    response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            if params is not None:
+                vacancies = data.get('items')
+            else:
+                vacancies = data['rates']['RUB']
 
-    if response.status_code == 200:
-        data = response.json()
-        if params is not None:
-            vacancies = data.get('items')
         else:
-            vacancies = data['rates']['RUB']
+            print('Ошибка при запросе данных:', response.status_code)
+            vacancies = 'stop'
 
-    else:
-        print('Ошибка при запросе данных:', response.status_code)
-        vacancies = 'stop'
-
-    return vacancies
+        return vacancies
+    except requests.exceptions.ConnectionError:
+        seconds = 10
+        print(f'Ошибка запроса!!! Через {seconds} секунд повторный запрос')
+        time.sleep(seconds)
+        return request_api(url, params)
 
 
 def operations_amounts(sum_from: str, sum_to: str, currency: str) -> str:

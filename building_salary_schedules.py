@@ -32,7 +32,7 @@ def monthly_salary_plot(filter_: dict):
 
     def query_sql(filter_d: dict):
         """
-        Формирут запрос в бд
+        Формируют запрос в бд
         :param filter_d: Фильтр
         :return: список из бд
         """

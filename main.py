@@ -1,10 +1,22 @@
 import multiprocessing
-from bot.main_bot import main_loop
+import os
+from dotenv import load_dotenv
+from bot.main_bot import TelegramBot
 from job_collector.cron_jobs import start_
 
-if __name__ == '__main__':
-    # Создаем два процесса для каждой функции
-    process1 = multiprocessing.Process(target=main_loop)
+def main():
+    # Используем метод spawn для создания новых процессов
+    multiprocessing.set_start_method('spawn')
+
+    # Загружаем переменные окружения из файла token.env
+    load_dotenv(dotenv_path='./bot/token.env')
+
+    API_TOKEN = os.getenv('BOT_API_TOKEN')
+    if not API_TOKEN:
+        raise ValueError("Токен API не предоставлен. Установите BOT_API_TOKEN в файле token.env")
+
+    # Создаем и запускаем два процесса
+    process1 = multiprocessing.Process(target=run_bot, args=(API_TOKEN,))
     process2 = multiprocessing.Process(target=start_)
 
     # Запускаем процессы
@@ -17,3 +29,12 @@ if __name__ == '__main__':
 
     # Выводим сообщение после завершения работы обоих процессов
     print("Работа всех процессов завершена")
+
+def run_bot(token):
+    import asyncio
+    from bot.main_bot import TelegramBot
+    bot = TelegramBot(token)
+    asyncio.run(bot.run())
+
+if __name__ == '__main__':
+    main()
