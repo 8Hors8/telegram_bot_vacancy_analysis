@@ -1,4 +1,5 @@
 """Содержит функции для построения графиков"""
+import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -24,7 +25,7 @@ def plot_salaries(df):
     plt.show()
 
 
-def monthly_salary_plot(filter_: dict):
+async def monthly_salary_plot(filter_: dict, id_user: str):
     """
     Строит график медианной заплаты по месяцам
     :param filter_: dict {'filter':str'условие фильтрации','city':str'город'}
@@ -94,8 +95,45 @@ def monthly_salary_plot(filter_: dict):
     plt.xticks(rotation=0)
 
     plt.tight_layout()
-    plt.show()
+    graph_path = creating_folder_file_name(id_user)
+    plt.savefig(graph_path)
+    plt.close()
+    return graph_path
+
+
+def creating_folder_file_name(id_user):
+    """
+    Создает уникальное имя файла для сохранения графика зарплаты на основе идентификатора пользователя.
+
+    :param id_user: (str): Идентификатор пользователя, используемый для формирования имени файла.
+
+    :return: str: Путь к уникальному файлу в формате 'graph/{id_user}_salary_plot.png' или 'graph/{id_user}_salary_plot_{counter}.png',
+    если файл с таким именем уже существует в папке 'graph'.
+    """
+    graph_folder = 'graph'
+    if not os.path.exists(graph_folder):
+        os.makedirs(graph_folder)
+
+    base_file_name = f'{id_user}_salary_plot'
+    graph_path = os.path.join(graph_folder, f'{base_file_name}.png')
+
+    # Проверка на существование файла и изменение имени, если файл существует
+    counter = 1
+    while os.path.exists(graph_path):
+        graph_path = os.path.join(graph_folder, f'{base_file_name}_{counter}.png')
+        counter += 1
+
+    return graph_path
+
+
+def delete_graph(graph_path: str):
+    """
+    Удаляет график после отправки.
+    :param graph_path: str: Путь к графику
+    """
+    if os.path.exists(graph_path):
+        os.remove(graph_path)
 
 
 if __name__ == '__main__':
-    monthly_salary_plot({'filter': 'python developer', 'city': 'Москва'})
+    monthly_salary_plot({'filter': 'python developer', 'city': 'Москва'}, '1')
