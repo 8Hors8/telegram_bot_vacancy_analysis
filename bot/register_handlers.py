@@ -1,6 +1,7 @@
 from aiogram import Dispatcher
 from .command_handler import register_command_handlers
 from .message_handler import register_message_handlers
+from .callback_handler import register_callback_handlers
 
 
 def register_all_handlers(dp: Dispatcher):
@@ -16,3 +17,4 @@ def register_all_handlers(dp: Dispatcher):
     """
     register_command_handlers(dp)
     register_message_handlers(dp)
+    register_callback_handlers(dp)

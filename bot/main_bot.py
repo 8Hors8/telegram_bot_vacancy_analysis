@@ -4,10 +4,12 @@ from .register_handlers import register_all_handlers
 class TelegramBot:
     def __init__(self, token: str):
         self.bot = Bot(token=token)
-        self.dp = Dispatcher(storage=MemoryStorage())
+        self.storage = MemoryStorage()
+        self.dp = Dispatcher(storage=self.storage)
 
-        register_all_handlers(self.dp)
+
     async def run(self):
+        register_all_handlers(self.dp)
         await self.dp.start_polling(self.bot)
 
 if __name__ == '__main__':

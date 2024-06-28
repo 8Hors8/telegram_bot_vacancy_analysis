@@ -15,9 +15,30 @@ class FilterForm(StatesGroup):
     Состояния:
     - waiting_for_role: Ожидание выбора роли
     (например, junior, middle, senior).
-    - waiting_for_city: Ожидание ввода города или региона.
+    - waiting_for_city: Ожидание ввода города.
     """
     waiting_for_role = State()
+    waiting_for_city = State()
+
+
+class FilterFreeForm(StatesGroup):
+    """
+   Состояния для формы фильтра.
+
+   Этот класс определяет состояния, в которых может
+   находиться пользователь в процессе взаимодействия
+   с формой фильтра в боте. Каждое состояние соответствует
+   определенному шагу ввода информации.
+
+   Состояния:
+   - waiting_for_filter: Ожидание ввода фильтра
+   (например, [django, middle, senior]).
+   -  waiting_for_date Ожидание ввода даты
+   (например, ['дата от','дата до'] пример ['2024-03', '2024-04'])
+   - waiting_for_city: Ожидание ввода города или региона.
+   """
+    waiting_for_filter = State()
+    waiting_for_date = State()
     waiting_for_city = State()
 
 
