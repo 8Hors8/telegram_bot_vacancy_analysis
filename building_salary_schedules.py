@@ -6,9 +6,10 @@ import pandas as pd
 from database import Database
 
 
-def plot_salaries(df):
+async def plot_salaries(df, id_user: str):
     """
     Строит график зарплат из таблицы vacancies с большим набором фильтров
+    :param id_user: str
     :param df: принимает dataframe из функции prepare_dataframe
     """
     plt.figure(figsize=(12, 5))
@@ -22,7 +23,10 @@ def plot_salaries(df):
     plt.gca().invert_yaxis()
     plt.xlabel('Зарплата (тыс. рублей)')
     plt.title('Анализ зарплат')
-    plt.show()
+    graph_path = creating_folder_file_name(id_user)
+    plt.savefig(graph_path)
+    plt.close()
+    return graph_path
 
 
 async def monthly_salary_plot(filter_: dict, id_user: str):
@@ -103,11 +107,13 @@ async def monthly_salary_plot(filter_: dict, id_user: str):
 
 def creating_folder_file_name(id_user):
     """
-    Создает уникальное имя файла для сохранения графика зарплаты на основе идентификатора пользователя.
+    Создает папку 'graph' и уникальное имя файла для сохранения графика
+    зарплаты на основе идентификатора пользователя.
 
     :param id_user: (str): Идентификатор пользователя, используемый для формирования имени файла.
 
-    :return: str: Путь к уникальному файлу в формате 'graph/{id_user}_salary_plot.png' или 'graph/{id_user}_salary_plot_{counter}.png',
+    :return: str: Путь к уникальному файлу в формате
+     'graph/{id_user}_salary_plot.png' или 'graph/{id_user}_salary_plot_{counter}.png',
     если файл с таким именем уже существует в папке 'graph'.
     """
     graph_folder = 'graph'

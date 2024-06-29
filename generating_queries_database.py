@@ -2,13 +2,14 @@ import time
 from database import Database
 
 
-def formation_filters(query_: list, dates_=None, city=None):
+def formation_filters(query_: list, dates_: list = None, city: str = None):
     """
+    Формирует запросы в БД исходя из заданных параметров
 
-    :param query_: list
+    :param query_: list пример [django, middle, senior]
     :param dates_: list ['дата от','дата до'] пример ['2024-03', '2024-04']
     :param city:str
-    :return:
+    :return: Возвращает список с данными из бд
     """
     framework = [
         'django', 'cherryPy', 'pyramid', 'turbogears', 'web2Py', 'flask', 'bottle',

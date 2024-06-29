@@ -3,7 +3,8 @@ from aiogram import types, Dispatcher, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import FSInputFile
-from building_salary_schedules import monthly_salary_plot, delete_graph
+from building_salary_schedules import monthly_salary_plot, delete_graph, plot_salaries
+from extract_db_df_salaries import extract_salaries, prepare_dataframe
 import constants
 
 
@@ -103,12 +104,12 @@ async def free_filter_handler(message: types.Message, state: FSMContext):
             await message.answer(f'Некорректный параметр {el}')
     if filter_list:
         await state.update_data(filter_list=filter_list)
-        await message.answer("""
-        Дополнительный параметр: дата.
-        Отправьте "pass", чтобы пропустить.
-        Формат: дата от, дата до, например, 2024-03, 2024-04
-        """)
+        await message.answer("Дополнительный параметр: дата."
+                             "\nОтправьте 'pass', чтобы пропустить."
+                             "\nФормат: дата от, дата до, например, 2024-03, 2024-04"
+                             )
         await state.set_state(FilterFreeForm.waiting_for_date)
+
     else:
         await message.answer("""
 Извините, но вы не указали ни одного корректного параметра для фильтрации.
@@ -123,8 +124,8 @@ async def free_date_handler(message: types.Message, state: FSMContext):
     dates = [item for item in date_workpiece if item]
     pattern = re.compile(r'^\d{4}-\d{2}$')
     notification = """
-    Дополнительный параметр: город.
-    Отправьте "pass", чтобы пропустить.
+Дополнительный параметр: город.
+Отправьте "pass", чтобы пропустить.
     """
     if dates[0] != 'pass':
         warning = 'tru'
@@ -138,11 +139,45 @@ async def free_date_handler(message: types.Message, state: FSMContext):
             await state.update_data(dates=dates)
             await message.answer(notification)
             await state.set_state(FilterFreeForm.waiting_for_city)
+
         else:
             await message.answer(warning)
     else:
+        await state.update_data(dates=None)
         await message.answer(notification)
         await state.set_state(FilterFreeForm.waiting_for_city)
+
+
+
+async def free_city_handler(message: types.Message, state: FSMContext):
+    cities_from_db = constants.city()
+    city = message.text.lower().title()
+    user_data = await state.get_data()
+    if city in cities_from_db or city.lower() == 'pass':
+        filter_ = {
+            'filter': user_data.get('filter_list'),
+            'datas': user_data.get('dates'),
+            'city': city if city.lower() != 'pass' else None
+        }
+        print(filter_)
+        salaries_dict = extract_salaries(filter_)
+        if salaries_dict:
+            df = prepare_dataframe(salaries_dict)
+            graph_path = await plot_salaries(df, str(message.from_user.id))
+            photo = FSInputFile(graph_path)
+            try:
+                await message.answer_photo(photo=photo)
+                # Удаляем график после успешной отправки
+                delete_graph(graph_path)
+            except Exception as e:
+                await message.answer(f"Произошла ошибка при отправке графика: {e}")
+        else:
+            await message.answer("Нет данных для заданных параметров фильтра в базе данных.")
+        await state.clear()
+
+    else:
+        await message.answer(f'Города с названием {city}  нет в БД'
+                             f'\nПопробуйте заново указать город')
 
 
 async def stub_message_handler(message: types.Message):
@@ -170,5 +205,6 @@ def register_message_handlers(dp: Dispatcher):
     dp.message.register(city_handler, FilterForm.waiting_for_city)
     dp.message.register(free_filter_handler, FilterFreeForm.waiting_for_filter)
     dp.message.register(free_date_handler, FilterFreeForm.waiting_for_date)
+    dp.message.register(free_city_handler, FilterFreeForm.waiting_for_city)
 
     dp.message.register(stub_message_handler)
