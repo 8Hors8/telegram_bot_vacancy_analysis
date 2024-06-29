@@ -53,8 +53,14 @@ async def button1_callback_handler(callback_query: types.CallbackQuery, state: F
     await state.set_state(FilterForm.waiting_for_role)
 
 
-async def button2_callback_handler(callback_query: types.CallbackQuery):
-    await callback_query.message.answer("Функционал графика с гибким фильтром еще не реализован.")
+async def button2_callback_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.message.answer("""
+    Введите параметры для фильтрации:
+    Вы можете указать несколько параметров через запятую, например (django, middle, senior).
+    Также можно указать несколько фреймворков.
+    Параметр "python" формирует график медианной зарплаты по всем направлениям и уровням разработчиков.
+    """)
+    await state.set_state(FilterFreeForm.waiting_for_filter)
 
 
 def register_callback_handlers(dp: Dispatcher):
