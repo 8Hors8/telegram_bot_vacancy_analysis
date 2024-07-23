@@ -1,3 +1,10 @@
+"""
+Собирает вакансии, создает базу данных и записывает данные по вакансиям в БД.
+
+Этот модуль отвечает за сбор данных о вакансиях, их обработку и сохранение в
+базу данных. Он включает в себя функции для создания базы данных,
+вставки данных и выполнения необходимых запросов.
+"""
 import random
 import re
 
@@ -96,7 +103,10 @@ def analysis_name(name: str) -> list:
             permission = False
             break
 
-    return [f'{developer_class}', f'{required_framework}', permission]
+    return [','.join(developer_class) if developer_class else None,
+            ','.join(required_framework) if required_framework else None,
+            permission
+            ]
 
 
 def transfers_data_bd(list_vacancies: list):
@@ -170,9 +180,8 @@ def sorting_vacancies():
                 sum_ = operations_amounts(vacancy.get('salary').get('from'),
                                           vacancy.get('salary').get('to'),
                                           vacancy.get('salary').get('currency'),
-
                                           )
-                area = [vacancy.get('area').get('id'), vacancy.get('area').get('name')]
+                area = vacancy.get('area').get('name')
                 published_at = vacancy.get('published_at').split('T')[0]
                 professional_roles = vacancy.get("professional_roles")[0]
 
@@ -180,9 +189,9 @@ def sorting_vacancies():
                     'vac_id': id_,
                     'name': name,
                     'sum': sum_,
-                    'area': f'{area}',
+                    'area': area,
                     'published_at': published_at,
-                    'professional_roles': f'{professional_roles}',
+                    'professional_roles': professional_roles['name'],
                     'developer_class': developer_class,
                     'required_framework': required_framework,
                     'date_scan': datetime.date.today()
@@ -204,7 +213,7 @@ def sorting_vacancies():
         else:
             sleep(time_)
 
-    transfers_data_bd(list_vacancies)
+    # transfers_data_bd(list_vacancies)
     return list_vacancies
 
 
