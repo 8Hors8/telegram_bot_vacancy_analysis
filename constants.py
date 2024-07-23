@@ -21,8 +21,7 @@ def city():
         data = bd.select_data('vacancies', ['DISTINCT area'])
         for item in data:
             city_data_str = item[0].strip("()").replace("'", "").replace("[", "").replace("]", "")
-            city_name = city_data_str.split(", ")[1].strip()
-            cities.append(city_name)
+            cities.append(city_data_str)
     city.call_count += 1
     return cities
 

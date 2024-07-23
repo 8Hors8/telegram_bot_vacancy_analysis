@@ -15,7 +15,12 @@ def monthly_average_salaries():
     filters_ = [['junior', 'middle', 'senior'], ['django', 'junior', 'middle', 'senior']]
     for city in cities:
         for el in filters_:
-            list_patches = extract_sal(filter_=el, datas_=[f'{date}'], city=city)
+            filters_dict = {
+                'filter': el,
+                'datas': [date],
+                'city': city
+            }
+            list_patches = extract_sal(filter_=filters_dict)
             if list_patches:
                 df = prepare_df(list_patches)
                 df['date'] = date

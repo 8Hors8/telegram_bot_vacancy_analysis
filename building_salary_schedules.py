@@ -142,4 +142,10 @@ def delete_graph(graph_path: str):
 
 
 if __name__ == '__main__':
-    monthly_salary_plot({'filter': 'python developer', 'city': 'Москва'}, '1')
+    import asyncio
+    async def main():
+        await monthly_salary_plot({'filter': 'python developer', 'city': 'Новосибирск'}, '1')
+
+
+    # Запуск основной асинхронной функции
+    asyncio.run(main())
